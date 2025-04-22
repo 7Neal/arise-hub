@@ -138,4 +138,4 @@ intervalSlider.FocusLost:Connect(function()
     end
 end)
 
--- Additional features from screenshots can be added here based on the specific implementations you want.
+-- Add additional functionality here based on the original SKYLOLAND script
