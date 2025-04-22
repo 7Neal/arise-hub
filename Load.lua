@@ -58,7 +58,7 @@ Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
 
 local title = Instance.new("TextLabel", Frame)
 title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "Skyhub for Arise"
+title.Text = "Arise Crossover Hub"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
@@ -138,4 +138,4 @@ intervalSlider.FocusLost:Connect(function()
     end
 end)
 
--- Add additional functionality here based on the original SKYLOLAND script
+-- Add additional functionalities as per the SKYLOLAND features.
