@@ -1,7 +1,6 @@
 -- SERVICES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
@@ -47,10 +46,10 @@ end)
 
 -- UI SETUP
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "MobAutoFarmGUI"
+ScreenGui.Name = "SkyhubGUI"
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 260, 0, 200)
+Frame.Size = UDim2.new(0, 300, 0, 400)
 Frame.Position = UDim2.new(0.02, 0, 0.3, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.Active = true
@@ -59,13 +58,13 @@ Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
 
 local title = Instance.new("TextLabel", Frame)
 title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "Mob AutoFarm Hub"
+title.Text = "Skyhub for Arise"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
 
--- TOGGLE BUTTON
+-- TOGGLE BUTTON FOR AUTO TELEPORT
 local Toggle = Instance.new("TextButton", Frame)
 Toggle.Size = UDim2.new(0.9, 0, 0, 30)
 Toggle.Position = UDim2.new(0.05, 0, 0, 40)
@@ -138,3 +137,5 @@ intervalSlider.FocusLost:Connect(function()
         intervalLabel.Text = "Teleport Interval: " .. teleportInterval .. "s"
     end
 end)
+
+-- Additional features from screenshots can be added here based on the specific implementations you want.
