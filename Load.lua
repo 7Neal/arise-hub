@@ -1,108 +1,140 @@
--- Load.lua
--- Arise: Crossover Script Hub (Fast Tween, Auto Farm, Anti-AFK)
-
 -- SERVICES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local VirtualUser = game:GetService("VirtualUser")
+local HRP = Character:WaitForChild("HumanoidRootPart")
+
+-- CONFIG (initial values)
+local tweenSpeed = 0.5
+local teleportInterval = 2
+local autoTeleportEnabled = false
+
+-- FUNCTIONS
+local function tweenTo(pos)
+    local tweenInfo = TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear)
+    local goal = {CFrame = CFrame.new(pos)}
+    TweenService:Create(HRP, tweenInfo, goal):Play()
+end
+
+local function findNearestMob()
+    local closest, minDist = nil, math.huge
+    for _, mob in pairs(workspace:GetDescendants()) do
+        if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") then
+            local dist = (HRP.Position - mob.HumanoidRootPart.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                closest = mob
+            end
+        end
+    end
+    return closest
+end
+
+-- AUTOTELEPORT LOOP
+task.spawn(function()
+    while true do
+        if autoTeleportEnabled then
+            local mob = findNearestMob()
+            if mob then
+                tweenTo(mob.HumanoidRootPart.Position + Vector3.new(0, 5, 0))
+            end
+        end
+        task.wait(teleportInterval)
+    end
+end)
 
 -- UI SETUP
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "AriseScriptHub"
+ScreenGui.Name = "MobAutoFarmGUI"
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 220, 0, 230)
-Frame.Position = UDim2.new(0.05, 0, 0.2, 0)
+Frame.Size = UDim2.new(0, 260, 0, 200)
+Frame.Position = UDim2.new(0.02, 0, 0.3, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Draggable = true
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
 
-Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
-
-local function CreateButton(text, yPos)
-    local btn = Instance.new("TextButton", Frame)
-    btn.Size = UDim2.new(0.9, 0, 0, 30)
-    btn.Position = UDim2.new(0.05, 0, 0, yPos)
-    btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    return btn
-end
-
--- CONFIG
-local tweenSpeed = 0.25
-local useFastTween = true
-local autoFarmEnabled = false
-
--- Tween function
-local function TweenTo(position)
-    local tweenInfo = TweenInfo.new(
-        useFastTween and tweenSpeed or 1,
-        Enum.EasingStyle.Linear,
-        Enum.EasingDirection.Out
-    )
-    local goal = { CFrame = CFrame.new(position) }
-    local tween = TweenService:Create(HumanoidRootPart, tweenInfo, goal)
-    tween:Play()
-end
-
--- UI BUTTONS
 local title = Instance.new("TextLabel", Frame)
 title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "Arise Script Hub"
-title.BackgroundTransparency = 1
+title.Text = "Mob AutoFarm Hub"
 title.TextColor3 = Color3.new(1, 1, 1)
+title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
 
-local ToggleTween = CreateButton("Tween: FAST", 40)
-local TeleportBtn = CreateButton("Teleport Example", 75)
-local AutoFarmBtn = CreateButton("Auto Farm: OFF", 110)
-local AntiAFKStatus = CreateButton("Anti-AFK: ACTIVE", 145)
+-- TOGGLE BUTTON
+local Toggle = Instance.new("TextButton", Frame)
+Toggle.Size = UDim2.new(0.9, 0, 0, 30)
+Toggle.Position = UDim2.new(0.05, 0, 0, 40)
+Toggle.Text = "Auto Teleport: OFF"
+Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Toggle.TextColor3 = Color3.new(1, 1, 1)
+Toggle.Font = Enum.Font.Gotham
+Toggle.TextSize = 14
+Instance.new("UICorner", Toggle).CornerRadius = UDim.new(0, 6)
 
--- Toggle Tween Speed
-ToggleTween.MouseButton1Click:Connect(function()
-    useFastTween = not useFastTween
-    ToggleTween.Text = "Tween: " .. (useFastTween and "FAST" or "SLOW")
+Toggle.MouseButton1Click:Connect(function()
+    autoTeleportEnabled = not autoTeleportEnabled
+    Toggle.Text = "Auto Teleport: " .. (autoTeleportEnabled and "ON" or "OFF")
 end)
 
--- Example teleport
-TeleportBtn.MouseButton1Click:Connect(function()
-    TweenTo(Vector3.new(100, 10, 100)) -- Change this to any coord
-end)
+-- TWEEN SPEED SLIDER
+local tweenLabel = Instance.new("TextLabel", Frame)
+tweenLabel.Position = UDim2.new(0.05, 0, 0, 80)
+tweenLabel.Size = UDim2.new(0.9, 0, 0, 20)
+tweenLabel.TextColor3 = Color3.new(1, 1, 1)
+tweenLabel.BackgroundTransparency = 1
+tweenLabel.Text = "Tween Speed: 0.5s"
+tweenLabel.Font = Enum.Font.Gotham
+tweenLabel.TextSize = 14
 
--- Auto Farm Toggle
-AutoFarmBtn.MouseButton1Click:Connect(function()
-    autoFarmEnabled = not autoFarmEnabled
-    AutoFarmBtn.Text = "Auto Farm: " .. (autoFarmEnabled and "ON" or "OFF")
+local tweenSlider = Instance.new("TextBox", Frame)
+tweenSlider.Position = UDim2.new(0.05, 0, 0, 100)
+tweenSlider.Size = UDim2.new(0.9, 0, 0, 25)
+tweenSlider.PlaceholderText = "Enter tween speed (e.g. 0.3)"
+tweenSlider.Text = ""
+tweenSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tweenSlider.TextColor3 = Color3.new(1, 1, 1)
+tweenSlider.Font = Enum.Font.Gotham
+tweenSlider.TextSize = 14
+Instance.new("UICorner", tweenSlider).CornerRadius = UDim.new(0, 6)
 
-    if autoFarmEnabled then
-        task.spawn(function()
-            while autoFarmEnabled do
-                -- Replace with actual farming coords or logic
-                TweenTo(Vector3.new(150, 10, 150))
-                task.wait(1.5)
-                TweenTo(Vector3.new(200, 10, 150))
-                task.wait(1.5)
-            end
-        end)
+tweenSlider.FocusLost:Connect(function()
+    local val = tonumber(tweenSlider.Text)
+    if val then
+        tweenSpeed = math.clamp(val, 0.05, 3)
+        tweenLabel.Text = "Tween Speed: " .. tweenSpeed .. "s"
     end
 end)
 
--- Anti-AFK Logic
-task.spawn(function()
-    while true do
-        task.wait(60)
-        VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-        VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+-- TELEPORT INTERVAL SLIDER
+local intervalLabel = Instance.new("TextLabel", Frame)
+intervalLabel.Position = UDim2.new(0.05, 0, 0, 135)
+intervalLabel.Size = UDim2.new(0.9, 0, 0, 20)
+intervalLabel.TextColor3 = Color3.new(1, 1, 1)
+intervalLabel.BackgroundTransparency = 1
+intervalLabel.Text = "Teleport Interval: 2s"
+intervalLabel.Font = Enum.Font.Gotham
+intervalLabel.TextSize = 14
+
+local intervalSlider = Instance.new("TextBox", Frame)
+intervalSlider.Position = UDim2.new(0.05, 0, 0, 155)
+intervalSlider.Size = UDim2.new(0.9, 0, 0, 25)
+intervalSlider.PlaceholderText = "Enter interval (e.g. 1.5)"
+intervalSlider.Text = ""
+intervalSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+intervalSlider.TextColor3 = Color3.new(1, 1, 1)
+intervalSlider.Font = Enum.Font.Gotham
+intervalSlider.TextSize = 14
+Instance.new("UICorner", intervalSlider).CornerRadius = UDim.new(0, 6)
+
+intervalSlider.FocusLost:Connect(function()
+    local val = tonumber(intervalSlider.Text)
+    if val then
+        teleportInterval = math.clamp(val, 0.1, 10)
+        intervalLabel.Text = "Teleport Interval: " .. teleportInterval .. "s"
     end
 end)
-
-print("[Arise Hub] Script loaded with Tween, Auto Farm, Anti-AFK.")
