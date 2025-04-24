@@ -132,3 +132,4 @@ end)
 
 -- You can expand this loop for dungeon, pet, and infernal features similarly.
 -- Final polish: Add notifications, credit tab, or protection logic if needed.
+Initial commit of full Arise Skylohub script
